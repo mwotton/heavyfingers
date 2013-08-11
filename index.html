@@ -1,0 +1,275 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            HeavyFingers
+        </title>
+        <script type="text/javascript" src="/elm-runtime.js">
+            
+        </script>
+        <script type="text/javascript">
+            
+Elm.HeavyFingers = function(elm){
+  var N = Elm.Native, _N = N.Utils(elm), _L = N.List(elm), _E = N.Error(elm), _J = N.JavaScript(elm), _str = _J.toString, $moduleName = 'HeavyFingers';
+  var Text = Elm.Text(elm);
+  var Text = Elm.Text(elm);
+  var Basics = Elm.Basics(elm);
+  var Signal = Elm.Signal(elm);
+  var List = Elm.List(elm);
+  var Maybe = Elm.Maybe(elm);
+  var Time = Elm.Time(elm);
+  var Prelude = Elm.Prelude(elm);
+  var Graphics = Graphics || {};
+  Graphics.Element = Elm.Graphics.Element(elm);
+  var Color = Elm.Color(elm);
+  var Graphics = Graphics || {};
+  Graphics.Collage = Elm.Graphics.Collage(elm);
+  var Keyboard = Elm.Keyboard(elm);
+  var Window = Elm.Window(elm);
+  var Color = Elm.Color(elm);
+  var Touch = Elm.Touch(elm);
+  var _op = {};
+  var textGreen = A3(Color.rgb, 160, 200, 160);
+  var txt = function(f){
+    return function($){
+      return Text.text(f(Text.monospace(Text.color(textGreen)(Text.toText($)))));};};
+  var stepV = F3(function(v, lowerCollision, upperCollision){
+    return (lowerCollision ? Basics.abs(v) : (upperCollision ? (0-Basics.abs(v)) : (Basics.otherwise ? v : _E.If($moduleName,'between lines 95 and 97'))));});
+  var sqd = F2(function(a, b){
+    return (Math.pow((a.x-b.x),2)+Math.pow((a.y-b.y),2));});
+  var signum = function(x){
+    return ((_N.cmp(x,0)>-1) ? 1 : (Basics.otherwise ? (0-1) : _E.If($moduleName,'between lines 61 and 63')));};
+  var red = A3(Color.rgb, 255, 0, 0);
+  var rad = function(mass){
+    return Basics.sqrt(mass);};
+  var pongGreen = A3(Color.rgb, 60, 100, 60);
+  var near = F3(function(k, c, n){
+    return ((_N.cmp(n,(k-c))>-1)&&(_N.cmp(n,(k+c))<1));});
+  var within = F2(function(ball, paddle){
+    return (A2(near, paddle.x, 8)(ball.x)&&A2(near, paddle.y, 20)(ball.y));});
+  var msg = _str('SPACE to start, WS and &uarr;&darr; to move');
+  var make = F2(function(obj, shape){
+    return Graphics.Collage.move({ctor:"_Tuple2", _0:obj.loc.x, _1:obj.loc.y})(Graphics.Collage.filled(obj.colour)(shape));});
+  var gravconst = 100;
+  var delta = A2(Signal._op['<~'], Time.inSeconds, Time.fps(35));
+  var computeGravity = function(obj){
+    return A2(List.foldl, F2(function(other, arg1){
+      return function(){
+        switch (arg1.ctor) {
+          case '_Tuple2':
+            return function(){
+              var ydiff = (other.loc.y-obj.loc.y);
+              var ydist_squared = Math.pow(ydiff,2);
+              var xdiff = (other.loc.x-obj.loc.x);
+              var xdist_squared = Math.pow(xdiff,2);
+              var squared_dist = A2(sqd, obj.loc, other.loc);
+              var attraction = ((other.mass*gravconst)/squared_dist);
+              var scaled = (attraction/squared_dist);
+              return {ctor:"_Tuple2", _0:(arg1._0+((scaled*xdist_squared)*signum(xdiff))), _1:(arg1._1+((scaled*ydist_squared)*signum(ydiff)))};}();
+        }_E.Case($moduleName,'between lines 68 and 77')}();}), {ctor:"_Tuple2", _0:0, _1:0});};
+  var stepObj = F3(function(t, objects, obj){
+    return function(){
+      var others = A2(List.filter, function(other){
+        return !_N.eq(other.loc,obj.loc);}, objects);
+      var _3 = A2(computeGravity, obj, others);
+      var acc_x = function(){
+        switch (_3.ctor) {
+          case '_Tuple2':
+            return _3._0;
+        }_E.Case($moduleName,'on line 84, column 21 to 46')}();
+      var acc_y = function(){
+        switch (_3.ctor) {
+          case '_Tuple2':
+            return _3._1;
+        }_E.Case($moduleName,'on line 84, column 21 to 46')}();
+      return _N.replace([['loc',{
+        _:{
+        },
+        x:(obj.loc.x+(obj.vel.x*t)),
+        y:(obj.loc.y+(obj.vel.y*t))}],['vel',{
+        _:{
+        },
+        x:(obj.vel.x+(acc_x*t)),
+        y:(obj.vel.y+(acc_y*t))}]], obj);}();});
+  var Play = {ctor:"Play"};
+  var Pause = {ctor:"Pause"};
+  var defaultGame = {
+    _:{
+    },
+    objects:_L.append(_J.toList([{
+    _:{
+    },
+    colour:A3(Color.rgb, 240, 240, 240),
+    loc:{
+    _:{
+    },
+    x:0,
+    y:0},
+    mass:1000,
+    name:_str('Sun'),
+    vel:{
+    _:{
+    },
+    x:0,
+    y:0}}]),A2(List.map, function(i){
+    return {
+      _:{
+      },
+      colour:A3(Color.rgb, 30, 30, 30),
+      loc:{
+      _:{
+      },
+      x:(10*i),
+      y:((0-i)*10)},
+      mass:200,
+      name:_str('Earth'),
+      vel:{
+      _:{
+      },
+      x:(((10-i)*10)-50),
+      y:(50-(i*10))}};}, _L.range(1,10))),
+    state:Pause,
+    transitory:_J.toList([])};
+  var Object = F5(function(a, b, c, d, e){
+    return {
+      _:{
+      },
+      colour:e,
+      loc:a,
+      mass:b,
+      name:d,
+      vel:c};});
+  var Input = F3(function(a, b, c){
+    return {
+      _:{
+      },
+      delta:c,
+      space:a,
+      touches:b};});
+  var input = A2(Signal.sampleOn, delta, A2(Signal._op['~'], A2(Signal._op['~'], A2(Signal._op['<~'], Input, Keyboard.space), Touch.touches), delta));
+  var Game = F3(function(a, b, c){
+    return {
+      _:{
+      },
+      objects:b,
+      state:a,
+      transitory:c};});
+  var Coord = F2(function(a, b){
+    return {
+      _:{
+      },
+      x:a,
+      y:b};});
+  var _10 = {ctor:"_Tuple2", _0:1200, _1:800};
+  var gameHeight = function(){
+    switch (_10.ctor) {
+      case '_Tuple2':
+        return _10._1;
+    }_E.Case($moduleName,'on line 22, column 27 to 35')}();
+  var gameWidth = function(){
+    switch (_10.ctor) {
+      case '_Tuple2':
+        return _10._0;
+    }_E.Case($moduleName,'on line 22, column 27 to 35')}();
+  var _17 = {ctor:"_Tuple2", _0:(gameWidth/2), _1:(gameHeight/2)};
+  var halfHeight = function(){
+    switch (_17.ctor) {
+      case '_Tuple2':
+        return _17._1;
+    }_E.Case($moduleName,'on line 23, column 27 to 51')}();
+  var halfWidth = function(){
+    switch (_17.ctor) {
+      case '_Tuple2':
+        return _17._0;
+    }_E.Case($moduleName,'on line 23, column 27 to 51')}();
+  var translate = function(obj){
+    return {
+      _:{
+      },
+      x:((obj.x-halfWidth)+120),
+      y:((((0-1)*obj.y)+halfHeight)-100)};};
+  var mkTouch = function(touch){
+    return {
+      _:{
+      },
+      colour:red,
+      loc:translate({
+      _:{
+      },
+      x:Basics.toFloat(touch.x),
+      y:Basics.toFloat(touch.y)}),
+      mass:2000.0,
+      name:_str('no'),
+      vel:{
+      _:{
+      },
+      x:0,
+      y:0}};};
+  var stepGame = F2(function(arg2, game){
+    return function(){
+      return function(){
+        var ts = A2(List.map, mkTouch, arg2.touches);
+        var allobjs = _L.append(game.objects,ts);
+        return {
+          _:{
+          },
+          objects:A2(List.map, A2(stepObj, arg2.delta, allobjs), allobjs),
+          state:(arg2.space ? Play : (Basics.otherwise ? game.state : _E.If($moduleName,'between lines 105 and 106'))),
+          transitory:_J.toList([])};}();}();});
+  var gameState = A3(Signal.foldp, stepGame, defaultGame, input);
+  var display = F2(function(arg2, arg1){
+    return function(){
+      return function(){
+        switch (arg2.ctor) {
+          case '_Tuple2':
+            return A3(Graphics.Element.container, arg2._0, arg2._1, Graphics.Element.middle)(A3(Graphics.Collage.collage, gameWidth, gameHeight, _L.append(_J.toList([Graphics.Collage.filled(pongGreen)(A2(Graphics.Collage.rect, gameWidth, gameHeight)),Graphics.Collage.move({ctor:"_Tuple2", _0:0, _1:(40-(gameHeight/2))})(Graphics.Collage.toForm((_N.eq(arg1.state,Play) ? A2(Graphics.Element.spacer, 1, 1) : (Basics.otherwise ? A2(txt, Basics.id, msg) : _E.If($moduleName,'on line 140, column 16 to 64')))))]),A2(List.map, function(x){
+              return function(){
+                var r = rad(x.mass);
+                return make(x)(A2(Graphics.Collage.oval, r, r));}();}, arg1.objects))));
+        }_E.Case($moduleName,'between lines 137 and 142')}();}();});
+  var main = A3(Signal.lift2, display, Window.dimensions, gameState);
+  return elm.HeavyFingers = {
+    _op : _op, 
+    delta : delta, 
+    input : input, 
+    gameHeight : gameHeight, 
+    gameWidth : gameWidth, 
+    halfHeight : halfHeight, 
+    halfWidth : halfWidth, 
+    defaultGame : defaultGame, 
+    sqd : sqd, 
+    signum : signum, 
+    gravconst : gravconst, 
+    computeGravity : computeGravity, 
+    stepObj : stepObj, 
+    near : near, 
+    within : within, 
+    stepV : stepV, 
+    stepGame : stepGame, 
+    translate : translate, 
+    mkTouch : mkTouch, 
+    gameState : gameState, 
+    red : red, 
+    pongGreen : pongGreen, 
+    textGreen : textGreen, 
+    txt : txt, 
+    msg : msg, 
+    make : make, 
+    display : display, 
+    rad : rad, 
+    main : main, 
+    Play : Play, 
+    Pause : Pause};};
+        </script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            Elm.fullscreen(Elm.HeavyFingers)
+        </script>
+        <noscript>
+            
+        </noscript>
+    </body>
+</html>
