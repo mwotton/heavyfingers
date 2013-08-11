@@ -10,7 +10,7 @@ import Touch
 
 type Input = { space:Bool, touches: [Touch.Touch], delta:Time }
 
-delta = inSeconds <~ fps 35
+delta = inSeconds <~ fps 100
 
 input = sampleOn delta (Input <~ Keyboard.space
                                ~ Touch.touches
@@ -80,7 +80,7 @@ computeGravity obj = foldl ( \ other (acc_x,acc_y) ->
 stepObj t objects obj = let (acc_x,acc_y) = computeGravity obj (filter (\x -> x.name /= obj.name) objects)
   in { obj | loc <- { x = obj.loc.x + obj.vel.x*t,
                       y = obj.loc.y + obj.vel.y*t },
-             vel <- { x = obj.vel.x + acc_x, y = obj.vel.y + acc_y }
+             vel <- { x = obj.vel.x + acc_x*t, y = obj.vel.y + acc_y*t }
      }
 
 near k c n = n >= k-c && n <= k+c
